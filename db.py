@@ -82,8 +82,31 @@ def deserialize():
     obj = pickle.loads(data)
 
     return str(obj)
+# -----------------------
+# XSS
+# -----------------------
+
+@app.route("/hello")
+def hello():
+    name = request.args.get("name", "")
+    return f"<h1>Hello {name}</h1>"
 
 
+# -----------------------
+#IDOR
+# -----------------------
+@app.route("/user")
+def get_user():
+    user_id = request.args.get("id")
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    return str(result)
+    
 # -----------------------
 # Arbitrary Code Execution
 # -----------------------
